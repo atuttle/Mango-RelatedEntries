@@ -17,9 +17,7 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries Beta 1 (0.2).
-
-The version number in parenthesis is in the format versionNumber.subversionRevisionNumber.
+This file is part of RelatedEntries 1.0.
 --->
 <script type="text/javascript">
 	// array find function from: 

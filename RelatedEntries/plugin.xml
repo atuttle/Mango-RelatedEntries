@@ -18,24 +18,23 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries Beta 1 (0.2).
-
-The version number in parenthesis is in the format versionNumber.subversionRevisionNumber.
+This file is part of RelatedEntries 1.0.
 -->
-<plugin id="com.tuttle.plugins.relatedentries" name="RelatedEntries" version="0.1" provider-name="Adam Tuttle | http://fusiongrokker.com" class="RelatedEntries.plugin">
+<plugin id="com.fusiongrokker.plugins.RelatedEntries" name="RelatedEntries" version="1.0" provider-name="Adam Tuttle | http://fusiongrokker.com" class="RelatedEntries.plugin">
 	<description><![CDATA[ Adds related entries selection to posts.<br/>
 	<br/>
 	Written By <a href="http://fusiongrokker.com">Adam Tuttle</a><br/>
 	Find the latest version at: <a href="http://fusiongrokker.com/page.cfm/projects">FusionGrokker</a> ]]></description>
-	<requiresVersion match="greaterOrEqual">1.1</requiresVersion>
+	<requiresVersion match="greaterOrEqual">1.3</requiresVersion>
 	<listens>
 		<event name="showRelatedEntriesList" type="synch" priority="10" />
 		<event name="beforePostContentEnd" type="synch" priority="10" />
-	</listens>
-	<listensAdmin>
 		<event name="beforeAdminPostFormDisplay" type="synch" priority="10" />
 		<event name="beforeAdminPostFormEnd" type="synch" priority="10" />
 		<event name="afterPostAdd" type="synch" priority="10" />
 		<event name="afterPostUpdate" type="synch" priority="10" />
-	</listensAdmin>
+	</listens>
+	<assetsAdmin>
+		<asset dir="ajax" />
+	</assetsAdmin>
 </plugin>
