@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+LICENSE INFORMATION:
+
+Copyright 2008, Adam Tuttle
+ 
+Licensed under the Apache License, Version 2.0 (the "License"); you may not 
+use this file except in compliance with the License. 
+
+You may obtain a copy of the License at 
+
+	http://www.apache.org/licenses/LICENSE-2.0 
+	
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+specific language governing permissions and limitations under the License.
+
+VERSION INFORMATION:
+
+This file is part of RelatedEntries Beta 1 (0.2).
+
+The version number in parenthesis is in the format versionNumber.subversionRevisionNumber.
+-->
+<plugin id="com.tuttle.plugins.relatedentries" name="RelatedEntries" version="0.1" provider-name="Adam Tuttle | http://fusiongrokker.com" class="RelatedEntries.plugin">
+	<description><![CDATA[ Adds related entries selection to posts.<br/>
+	<br/>
+	Written By <a href="http://fusiongrokker.com">Adam Tuttle</a><br/>
+	Find the latest version at: <a href="http://fusiongrokker.com/page.cfm/projects">FusionGrokker</a> ]]></description>
+	<requiresVersion match="greaterOrEqual">1.1</requiresVersion>
+	<listens>
+		<event name="showRelatedEntriesList" type="synch" priority="10" />
+		<event name="beforePostContentEnd" type="synch" priority="10" />
+	</listens>
+	<listensAdmin>
+		<event name="beforeAdminPostFormDisplay" type="synch" priority="10" />
+		<event name="beforeAdminPostFormEnd" type="synch" priority="10" />
+		<event name="afterPostAdd" type="synch" priority="10" />
+		<event name="afterPostUpdate" type="synch" priority="10" />
+	</listensAdmin>
+</plugin>
