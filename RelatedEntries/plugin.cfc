@@ -21,8 +21,7 @@ This file is part of RelatedEntries 1.0.
 --->
 <cfcomponent extends="BasePlugin">
 
-	<!--- <cfset variables.customFieldKey = "relEntries-b1" /> --->
-	<cfset variables.customFieldKey = "relEntries-1.0" />
+	<cfset variables.customFieldKey = "relEntries-b1" />
 
 	<cffunction name="init" access="public" output="false" returntype="any">
 		<cfargument name="mainManager" type="any" required="true" />
@@ -32,11 +31,6 @@ This file is part of RelatedEntries 1.0.
 		<cfset setPreferencesManager(arguments.preferences) />
 		<cfset setPackage("com/fusiongrokker/plugins/RelatedEntries") />
 		
-		<!--- deprecated?
-		<cfset var blogid = arguments.mainManager.getBlog().getId() />
-		<cfset variables.path = blogid & "/" & variables.package />
-		--->
-
 		<cfreturn this/>
 	</cffunction>
 
