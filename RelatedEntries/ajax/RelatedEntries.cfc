@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries 1.0.
+This file is part of RelatedEntries 1.1.
 --->
 <cfcomponent>
 	<!--- Create an instance of the JSON Utility, for compatability with older versions of CF --->
