@@ -161,7 +161,7 @@
 					
 					<!--- If data type is array, append data to the array --->
 					<cfif dataType EQ "array">
-						<cfset arrayappend( ar, deserialize(dataStr, arguments.strictMapping) ) />
+						<cfset arrayappend( ar, this.deserialize(dataStr, arguments.strictMapping) ) />
 					<!--- If data type is struct or query or queryByColumns... --->
 					<cfelseif dataType EQ "struct" OR dataType EQ "query" OR dataType EQ "queryByColumns">
 						<cfset dataStr = Mid(_data, startPos, i-startPos) />
@@ -182,20 +182,20 @@
 						
 						<!--- If struct, add to the structure --->
 						<cfif dataType EQ "struct">
-							<cfset StructInsert( st, structKey, deserialize(structVal, arguments.strictMapping) ) />
+							<cfset StructInsert( st, structKey, this.deserialize(structVal, arguments.strictMapping) ) />
 						
 						<!--- If query, build the query --->
 						<cfelseif dataType EQ "queryByColumns">
 							<cfif structKey EQ "rowcount">
-								<cfset qRows = deserialize(structVal, arguments.strictMapping) />
+								<cfset qRows = this.deserialize(structVal, arguments.strictMapping) />
 							<cfelseif structKey EQ "columns">								
-								<cfset qCols = deserialize(structVal, arguments.strictMapping) />
+								<cfset qCols = this.deserialize(structVal, arguments.strictMapping) />
 								<cfset st = QueryNew(ArrayToList(qCols)) />
 								<cfif qRows>
 									<cfset QueryAddRow(st, qRows) />
 								</cfif>
 							<cfelseif structKey EQ "data">
-								<cfset qData = deserialize(structVal, arguments.strictMapping) />
+								<cfset qData = this.deserialize(structVal, arguments.strictMapping) />
 								<cfset ar = StructKeyArray(qData) />
 								<cfloop from="1" to="#ArrayLen(ar)#" index="j">
 									<cfloop from="1" to="#st.recordcount#" index="qRows">
@@ -206,10 +206,10 @@
 							</cfif>
 						<cfelseif dataType EQ "query">
 							<cfif structKey EQ "columns">
-								<cfset qCols = deserialize(structVal, arguments.strictMapping) />
+								<cfset qCols = this.deserialize(structVal, arguments.strictMapping) />
 								<cfset st = QueryNew(ArrayToList(qCols)) />
 							<cfelseif structKey EQ "data">
-								<cfset qData = deserialize(structVal, arguments.strictMapping) />
+								<cfset qData = this.deserialize(structVal, arguments.strictMapping) />
 								<cfloop from="1" to="#ArrayLen(qData)#" index="qRows">
 									<cfset QueryAddRow(st) />
 									<cfloop from="1" to="#ArrayLen(qCols)#" index="j">
@@ -354,7 +354,7 @@
 			
 		<!--- CUSTOM FUNCTION --->
 		<cfelseif IsCustomFunction(_data)>			
-			<cfreturn serialize( GetMetadata(_data), arguments.strictMapping) />
+			<cfreturn this.serialize( GetMetadata(_data), arguments.strictMapping) />
 			
 		<!--- OBJECT --->
 		<cfelseif IsObject(_data)>		
@@ -364,7 +364,7 @@
 		<cfelseif IsArray(_data)>
 			<cfset dJSONString = ArrayNew(1) />
 			<cfloop from="1" to="#ArrayLen(_data)#" index="i">
-				<cfset tempVal = serialize( _data[i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
+				<cfset tempVal = this.serialize( _data[i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
 				<cfset ArrayAppend(dJSONString,tempVal) />
 			</cfloop>	
 					
@@ -375,7 +375,7 @@
 			<cfset dJSONString = ArrayNew(1) />
 			<cfset arKeys = StructKeyArray(_data) />
 			<cfloop from="1" to="#ArrayLen(arKeys)#" index="i">
-				<cfset tempVal = serialize(_data[ arKeys[i] ], arguments.serializeQueryByColumns, arguments.strictMapping ) />
+				<cfset tempVal = this.serialize(_data[ arKeys[i] ], arguments.serializeQueryByColumns, arguments.strictMapping ) />
 				<cfset ArrayAppend(dJSONString,'"' & arKeys[i] & '":' & tempVal) />
 			</cfloop>
 						
@@ -413,9 +413,9 @@
 					<cfloop from="1" to="#_data.recordcount#" index="i">
 						<cfset ArrayAppend(dJSONString,rowDel) />
 						<cfif arguments.strictMapping AND Len(columnJavaTypes[column])>
-							<cfset tempVal = serialize( JavaCast(columnJavaTypes[column],_data[column][i]), arguments.serializeQueryByColumns, arguments.strictMapping ) />
+							<cfset tempVal = this.serialize( JavaCast(columnJavaTypes[column],_data[column][i]), arguments.serializeQueryByColumns, arguments.strictMapping ) />
 						<cfelse>
-							<cfset tempVal = serialize( _data[column][i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
+							<cfset tempVal = this.serialize( _data[column][i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
 						</cfif>							
 						<cfset ArrayAppend(dJSONString,tempVal) />
 						<cfset rowDel = ",">	
@@ -435,9 +435,9 @@
 					<cfloop list="#columnlist#" delimiters="," index="column">
 						<cfset ArrayAppend(dJSONString,colDel) />
 						<cfif arguments.strictMapping AND Len(columnJavaTypes[column])>
-							<cfset tempVal = serialize( JavaCast(columnJavaTypes[column],_data[column][i]), arguments.serializeQueryByColumns, arguments.strictMapping ) />
+							<cfset tempVal = this.serialize( JavaCast(columnJavaTypes[column],_data[column][i]), arguments.serializeQueryByColumns, arguments.strictMapping ) />
 						<cfelse>
-							<cfset tempVal = serialize( _data[column][i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
+							<cfset tempVal = this.serialize( _data[column][i], arguments.serializeQueryByColumns, arguments.strictMapping ) />
 						</cfif>	
 						<cfset ArrayAppend(dJSONString,tempVal) />
 						<cfset colDel=","/>
