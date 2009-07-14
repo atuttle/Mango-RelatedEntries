@@ -68,7 +68,8 @@ This file is part of RelatedEntries 1.1.
 	});
 	//================================================================
 	var entryId = <cfoutput>'#local.entryId#';</cfoutput>
-	var entrySep = '@&@&@&@';
+	var entrySep = <cfoutput>'#variables.entryDelim#';</cfoutput>
+	var titleSep = <cfoutput>'#variables.titleDelim#';</cfoutput>
 	function handleClick(catBox){
 		//get list of selected id's
 		var sel = '';
@@ -112,37 +113,59 @@ This file is part of RelatedEntries 1.1.
 		}
 	}
 	function addRelEntry(id,title){
-		if (!relEntryIdList.split(entrySep).find(id + '|' + title)){
-			relEntryIdList = relEntryIdList + entrySep + id + '|' + title;
+		if (!relEntryIdList.split(entrySep).find(id + titleSep + title)){
+			if (relEntryIdList.length > 0){
+				relEntryIdList = relEntryIdList + entrySep;
+			}
+			relEntryIdList = relEntryIdList + id + titleSep + title;
 			if (relEntryIdList.indexOf(',') == 0){ relEntryIdList = relEntryIdList.substr(1); }//drop leading comma (if it's there)
 			document.getElementById('relatedEntries').value = relEntryIdList;
 			refreshRelEntriesBox();
 		}
 	}
 	function removeRelEntry(id,title){
+		//escape chars that are special characters in regex
+		title = title.replace('(', '\\(');
+		title = title.replace(')', '\\)');
+		title = title.replace('[', '\\[');
+		title = title.replace(']', '\\]');
+		title = title.replace('{', '\\{');
+		title = title.replace('}', '\\}');
+		//create regexes
 		var regex1 = new RegExp('' + id + '\\|' + title + '');
-		var regex2 = new RegExp('(' + entrySep + '){2}');
-		relEntryIdList = relEntryIdList.replace(regex1, '');
-		relEntryIdList = relEntryIdList.replace(regex2, entrySep);
+		relEntryIdList = relEntryIdList.replace(regex1, '');	   //remove the selected entry
 		document.getElementById('relatedEntries').value = relEntryIdList;
+		cleanupRelEntryList();
 		refreshRelEntriesBox();
 	}
+	function cleanupRelEntryList(){
+		var regex = new RegExp('(' + entrySep + '){2}');
+		relEntryIdList = relEntryIdList.replace(regex, entrySep); //replace any occurrence of 2 entrySep's with one
+		if (relEntryIdList.substr(0,7) == entrySep){
+			relEntryIdList = relEntryIdList.substr(7);
+		}
+		if (relEntryIdList.substr((relEntryIdList.length - 8)) == entrySep){
+			relEntryIdList = relEntryIdList.substr(0, relEntryIdList.length - 8);
+		}
+		document.getElementById('relatedEntries').value = relEntryIdList;
+	}
 	function refreshRelEntriesBox(){
+		var box = document.getElementById('relatedEntriesBox');
 		if (relEntryIdList.length > 0){
-			var box = document.getElementById('relatedEntriesBox');
 			var vals = '';
 			box.options.length = 0;
 			pairs = relEntryIdList.split(entrySep);
 			for (var pair = 0; pair < pairs.length; pair++){
-				vals = pairs[pair].split('|');
+				vals = pairs[pair].split(titleSep);
 				if (vals.length > 1){ //ignore no-title (added in older version)
 					lbAddOption(box, vals[1], vals[0]);
 				}
 			}
+		}else{
+			box.options.length = 0;
 		}
 	}
 </script>
-
 <cfoutput>
 	<div style="width:auto; float:left;">
 		<strong>Find Related Entries:</strong><br />
