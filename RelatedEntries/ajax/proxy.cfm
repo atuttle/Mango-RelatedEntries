@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries 1.1.
+This file is part of RelatedEntries.
 --->
 <cfparam name="url.catIdList" default=""/>
 <cfset result = createObject("component", "RelatedEntries").getEntriesByCatIdList(url.catIdList)/>

@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries 1.1.
+This file is part of RelatedEntries.
 --->
 <cfcomponent>
 	<!--- Create an instance of the JSON Utility, for compatability with older versions of CF --->
@@ -54,7 +54,7 @@ This file is part of RelatedEntries 1.1.
 			<cfset rtn[p].name = posts[p].getTitle()/>
 		</cfloop>
 		
-		<cfreturn variables.json.serialize(rtn) />
+		<cfreturn variables.json.serializeCustom(rtn) />
 	</cffunction>
 
 </cfcomponent>

@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries 1.1.
+This file is part of RelatedEntries.
 --->
 <script type="text/javascript">
 	// array find function from: 
@@ -122,6 +122,7 @@ This file is part of RelatedEntries 1.1.
 			document.getElementById('relatedEntries').value = relEntryIdList;
 			refreshRelEntriesBox();
 		}
+console.log(relEntryIdList);
 	}
 	function removeRelEntry(id,title){
 		//escape chars that are special characters in regex
@@ -137,6 +138,7 @@ This file is part of RelatedEntries 1.1.
 		document.getElementById('relatedEntries').value = relEntryIdList;
 		cleanupRelEntryList();
 		refreshRelEntriesBox();
+console.log(relEntryIdList);
 	}
 	function cleanupRelEntryList(){
 		var regex = new RegExp('(' + entrySep + '){2}');
@@ -148,6 +150,7 @@ This file is part of RelatedEntries 1.1.
 			relEntryIdList = relEntryIdList.substr(0, relEntryIdList.length - 8);
 		}
 		document.getElementById('relatedEntries').value = relEntryIdList;
+console.log(relEntryIdList);
 	}
 	function refreshRelEntriesBox(){
 		var box = document.getElementById('relatedEntriesBox');

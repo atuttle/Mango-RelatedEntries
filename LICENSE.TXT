@@ -16,4 +16,4 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries Mango Blog Plugin 1.1.
+This file is part of RelatedEntries Mango Blog Plugin.

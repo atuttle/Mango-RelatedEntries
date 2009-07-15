@@ -17,11 +17,9 @@ specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
 
-This file is part of RelatedEntries 1.1.
+This file is part of RelatedEntries.
 --->
 <cfcomponent extends="BasePlugin">
-
-	<cfset variables.customFieldKey = "relEntries-b1" />
 
 	<cffunction name="init" access="public" output="false" returntype="any">
 		<cfargument name="mainManager" type="any" required="true" />
@@ -31,6 +29,13 @@ This file is part of RelatedEntries 1.1.
 		<cfset setPreferencesManager(arguments.preferences) />
 		<cfset setPackage("com/fusiongrokker/plugins/RelatedEntries") />
 		
+		<cfset variables.customFieldKey = "relEntries-b1" />
+		<cfset variables.entryDelim = "@&@&@&@" />
+		<cfset variables.titleDelim = "|" />
+		<cfset variables.entryDelimShort = chr(10) />
+		<cfset variables.titleDelimShort = chr(13) />
+		<cfset variables.logFile = "Mango-RelatedEntries" />
+	
 		<cfreturn this/>
 	</cffunction>
 
@@ -68,19 +73,27 @@ This file is part of RelatedEntries 1.1.
 							<cfset local.entryRelatedEntryIds = request.relatedEntriesRawData />
 							<cfset local.entryRelatedEntryIds = replace(local.entryRelatedEntryIds, "'", "\'", "ALL") />
 						</cfif>
+						<!--- convert delimiters to a single character --->
+						<cfset local.entryRelatedEntryIds = replace(local.entryRelatedEntryIds,variables.entryDelim,variables.entryDelimShort, "ALL")/>
 					</cfsilent>
 					<script type="text/javascript">
 						<cfoutput>
 						var ajaxPath = '#local.assetPath#';
 						var relEntryIdList = '';
-						<cfloop from="1" to="#listLen(local.entryRelatedEntryIds, '|')#" index="local.entryNum">
-						relEntryIdList += '#listGetAt(local.entryRelatedEntryIds, local.entryNum, "|")#<cfif local.entryNum lt listLen(local.entryRelatedEntryIds, "|")>|</cfif>';
+						<cfloop from="1" to="#listLen(local.entryRelatedEntryIds, variables.entryDelimShort)#" index="local.entryNum">
+						relEntryIdList += '#listGetAt(local.entryRelatedEntryIds, local.entryNum, variables.entryDelimShort)#<cfif local.entryNum lt listLen(local.entryRelatedEntryIds, variables.entryDelimShort)>#variables.entryDelim#</cfif>';
 						</cfloop>
 						</cfoutput>
 					</script>
 					<fieldset id="customFieldsFieldset" class="">
 						<legend>Related Entries</legend>
 						<div>
+							<cfset local.entryRelatedEntryIds = replace(local.entryRelatedEntryIds,variables.entryDelimShort,variables.entryDelim, "ALL")/>
+							<cfif len(local.entryRelatedEntryIds) gt len(variables.entryDelim) and left(local.entryRelatedEntryIds, len(variables.entryDelim)) eq variables.entryDelim>
+								<cfset local.entryRelatedEntryIds = right(local.entryRelatedEntryIds, len(local.entryRelatedEntryIds) - len(variables.entryDelim)) />
+							<cfelseif local.entryRelatedEntryIds eq variables.entryDelim>
+								<cfset local.entryRelatedEntryIds = "" />
+							</cfif>
 							<cfinclude template="relatedEntries.cfm">
 						</div>
 					</fieldset>
@@ -93,7 +106,7 @@ This file is part of RelatedEntries 1.1.
 				<!--- use this event to hide related entries data from the user in the "custom fields" section... no reason for its raw data to show up ---> 
 				<cfif arguments.event.item.customFieldExists(variables.customFieldKey)>
 					<cfset request.relatedEntriesRawData = arguments.event.item.getCustomField(variables.customFieldKey).value />
-					<cfset arguments.event.item.removeCustomField(variables.customFieldKey) />
+					<!---<cfset arguments.event.item.removeCustomField(variables.customFieldKey) />--->
 				</cfif>
 
 			</cfcase>
@@ -102,26 +115,28 @@ This file is part of RelatedEntries 1.1.
 			
 				<cfif arguments.event.contextData.currentPost.customFieldExists(variables.customFieldKey)>
 					<cfset local.relData = arguments.event.contextData.currentPost.getCustomField(variables.customFieldKey).value />
-					<cfset local.relData = replace(local.relData, "@&@&@&@", chr(10), "ALL") />
-					<cfsavecontent variable="local.relEntryLinkList"><cfoutput>
-						<div class="related">
-							<h4>Related Entries:</h4>
-							<ul>
-								<cfloop list="#local.relData#" index="local.relEntryId" delimiters="#chr(10)#">
-									<cftry>
-										<cfsilent>
-											<cfset local.relEntryObj = blogManager.getPostsManager().getPostById(listFirst(local.relEntryId,'|')) />
-										</cfsilent>
-										<li><a href="#local.relEntryObj.getPermalink()#">#local.relEntryObj.getTitle()#</a></li>
-										<cfcatch>
-											<!--- post not found because it is a draft/etc --->
-										</cfcatch>
-									</cftry>
-								</cfloop>
-							</ul>
-						</div>
-					</cfoutput></cfsavecontent>
-					<cfset arguments.event.setOutputData(local.relEntryLinkList)/>
+					<cfset local.relData = replace(local.relData, variables.entryDelim, variables.entryDelimShort, "ALL") />
+					<cfif listLen(local.relData, variables.entryDelimShort)>
+						<cfsavecontent variable="local.relEntryLinkList"><cfoutput>
+							<div class="related">
+								<h4>Related Entries:</h4>
+								<ul>
+									<cfloop list="#local.relData#" index="local.relEntryId" delimiters="#variables.entryDelimShort#">
+										<cftry>
+											<cfsilent>
+												<cfset local.relEntryObj = variables.mainManager.getPostsManager().getPostById(listFirst(local.relEntryId,'|')) />
+											</cfsilent>
+											<li><a href="#local.relEntryObj.getPermalink()#">#local.relEntryObj.getTitle()#</a></li>
+											<cfcatch>
+												<!--- post not found because it is a draft/etc --->
+											</cfcatch>
+										</cftry>
+									</cfloop>
+								</ul>
+							</div>
+						</cfoutput></cfsavecontent>
+						<cfset arguments.event.setOutputData(local.relEntryLinkList)/>
+					</cfif>
 				</cfif>
 
 			</cfcase>
@@ -130,12 +145,13 @@ This file is part of RelatedEntries 1.1.
 			
 				<!--- set related entries for this entry --->
 				<cfif structKeyExists(arguments.event.data.rawData, "relatedEntries")><!--- this catches the original form post (add/update entry) --->
-					<cfset local.entryId = arguments.event.data.post.id/>
+					<cfset local.entryId = arguments.event.data.post.id />
+					<cfset local.entryTitle = arguments.event.data.post.getTitle() />
 					<!--- add the related entries data for the newly added/updated entry --->
 					<cfset arguments.event.data.post.setCustomField(variables.customFieldKey, "Related Entries", arguments.event.data.rawdata.relatedEntries) />
 					<!--- save the entry again --->
 					<cftry>
-						<cflog file="Mango-RelatedEntries" text="updating entry: #arguments.event.data.post.getTitle()#">
+						<cflog file="#variables.logFile#" text="updating entry: #arguments.event.data.post.getTitle()#">
 						<cfset getManager().getAdministrator().editPost(
 								arguments.event.data.post.getId(),
 								arguments.event.data.post.getTitle(),
@@ -147,51 +163,58 @@ This file is part of RelatedEntries 1.1.
 								"",<!--- user, isn't used --->
 								arguments.event.data.post.customFields
 						)/>
-						<cflog file="Mango-RelatedEntries" text="last update successful">
+						<cflog file="#variables.logFile#" text="last update successful">
 						<cfcatch>
 							<cfdump var="#local#" label="local vars">
 							<cfdump var="#cfcatch#">
-							<cflog file="Mango-RelatedEntries" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
+							<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
 							<cfabort>
 						</cfcatch>
 					</cftry>
 	
 					<!--- now update each related entry and add this entry to its related list... --->
-					<cfset local.tmp = replace(arguments.event.data.rawdata.relatedEntries, "@&@&@&@", chr(10), "ALL") />
-					<cfloop list="#local.tmp#" index="local.refPostId" delimiters="#chr(10)#">
-						<cfset local.refPostId = listFirst(local.refPostId, "|") />
-						<cfset local.refPost = getManager().getPostsManager().getPostById(local.refPostId, true) />
+					<cfset local.tmp = arguments.event.data.rawdata.relatedEntries />
+					<cfset local.tmp = replace(local.tmp, variables.entryDelim, variables.entryDelimShort, "ALL") />
+					<cfset local.tmp = replace(local.tmp, variables.titleDelim, variables.titleDelimShort, "ALL") />
+					<cfloop list="#local.tmp#" index="local.refPost" delimiters="#variables.entryDelimShort#">
+						<cfset local.refPostTitle = listLast(local.refPost, variables.titleDelimShort) />
+						<cfset local.refPostId = listFirst(local.refPost, variables.titleDelimShort) />
+						<cfset local.refPostObj = getManager().getPostsManager().getPostById(local.refPostId, true) />
 						<!--- keep existing related entries of the entry, but add our new one --->
-						<cfif local.refPost.customFieldExists(variables.customFieldKey)>
-							<cfset local.existingRelentries = local.refPost.getCustomField(variables.customFieldKey).value /> 
+						<cfif local.refPostObj.customFieldExists(variables.customFieldKey)>
+							<cfset local.existingRelentries = local.refPostObj.getCustomField(variables.customFieldKey).value /> 
 						<cfelse>
 							<cfset local.existingRelentries = "" /> 
 						</cfif>
 						<!--- no duplicates --->
 						<cftry>
-							<cfif not listFind(local.existingRelentries, local.entryId)>
-								<cfset local.existingRelentries = listAppend(local.existingRelentries, local.entryId)/>
-								<cfset local.refPost.setCustomField(variables.customFieldKey, "Related Entries", local.existingRelentries)/>
-								<cflog file="Mango-RelatedEntries" text="updating entry: #local.refPost.getTitle()#">
+							<!--- don't care that it's a list, just can we find the id of the original post in the relation data --->
+							<cfif not findNoCase(local.entryId, local.existingRelentries)>
+								<cfif len(local.existingRelentries) gt 0>
+									<cfset local.existingRelentries = local.existingRelEntries & variables.entryDelim />
+								</cfif>
+								<cfset local.existingRelentries = local.existingRelEntries & local.entryId & variables.titleDelim & local.entryTitle />
+								<cfset local.refPostObj.setCustomField(variables.customFieldKey, "Related Entries", local.existingRelentries)/>
+								<cflog file="#variables.logFile#" text="updating entry: #local.refPostObj.getTitle()#">
 								<cfset getManager().getAdministrator().editPost(
-										local.refPost.getId(),
-										local.refPost.getTitle(),
-										local.refPost.getContent(),
-										local.refPost.getExcerpt(),
-										local.refPost.getStatus() eq "published",
-										local.refPost.getCommentsAllowed(),
-										local.refPost.getPostedOn(),
+										local.refPostObj.getId(),
+										local.refPostObj.getTitle(),
+										local.refPostObj.getContent(),
+										local.refPostObj.getExcerpt(),
+										local.refPostObj.getStatus() eq "published",
+										local.refPostObj.getCommentsAllowed(),
+										local.refPostObj.getPostedOn(),
 										"",<!--- user, isn't used --->
-										local.refPost.customFields
+										local.refPostObj.customFields
 								)/>
-								<cflog file="Mango-RelatedEntries" text="last update successful">
+								<cflog file="#variables.logFile#" text="last update successful">
 							<cfelse>
-								<cflog file="Mango-RelatedEntries" text="skipping update of related entry: #local.entryId#">
+								<cflog file="#variables.logFile#" text="skipping update of related entry: #local.entryId#">
 							</cfif>
 							<cfcatch>
 								<cfdump var="#local#" label="local vars">
 								<cfdump var="#cfcatch#">
-								<cflog file="Mango-RelatedEntries" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
+								<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
 								<cfabort>
 							</cfcatch>
 						</cftry>
