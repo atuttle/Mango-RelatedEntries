@@ -297,8 +297,9 @@ go
 
 --copy final data back over to real table
 delete from entry_custom_field where id='relEntries-b1'
-insert into entry_custom_field
-select * from #ecf_new
+insert into entry_custom_field (id, entry_id, [name], field_value)
+select id, entry_id, [name], field_value from #ecf_new where id = 'relEntries-b1'
+go
 
 --delete temp table for results
 drop table #ecf_new
