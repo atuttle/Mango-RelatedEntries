@@ -98,7 +98,7 @@ This file is part of RelatedEntries.
 						</div>
 					</fieldset>
 				</cfsavecontent>
-				<cfset arguments.event.setOutputData(relEntries) />
+				<cfset arguments.event.setOutputData(arguments.event.getOutputData() & relEntries) />
 
 			</cfcase>
 
