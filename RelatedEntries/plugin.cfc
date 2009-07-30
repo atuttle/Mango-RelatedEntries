@@ -106,7 +106,7 @@ This file is part of RelatedEntries.
 				<!--- use this event to hide related entries data from the user in the "custom fields" section... no reason for its raw data to show up ---> 
 				<cfif arguments.event.item.customFieldExists(variables.customFieldKey)>
 					<cfset request.relatedEntriesRawData = arguments.event.item.getCustomField(variables.customFieldKey).value />
-					<!---<cfset arguments.event.item.removeCustomField(variables.customFieldKey) />--->
+					<cfset arguments.event.item.removeCustomField(variables.customFieldKey) />
 				</cfif>
 
 			</cfcase>
