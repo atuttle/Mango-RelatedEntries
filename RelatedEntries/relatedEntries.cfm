@@ -122,7 +122,7 @@ This file is part of RelatedEntries.
 			document.getElementById('relatedEntries').value = relEntryIdList;
 			refreshRelEntriesBox();
 		}
-console.log(relEntryIdList);
+		//console.log(relEntryIdList);
 	}
 	function removeRelEntry(id,title){
 		//escape chars that are special characters in regex
@@ -138,7 +138,7 @@ console.log(relEntryIdList);
 		document.getElementById('relatedEntries').value = relEntryIdList;
 		cleanupRelEntryList();
 		refreshRelEntriesBox();
-console.log(relEntryIdList);
+		//console.log(relEntryIdList);
 	}
 	function cleanupRelEntryList(){
 		var regex = new RegExp('(' + entrySep + '){2}');
@@ -150,7 +150,7 @@ console.log(relEntryIdList);
 			relEntryIdList = relEntryIdList.substr(0, relEntryIdList.length - 8);
 		}
 		document.getElementById('relatedEntries').value = relEntryIdList;
-console.log(relEntryIdList);
+		//console.log(relEntryIdList);
 	}
 	function refreshRelEntriesBox(){
 		var box = document.getElementById('relatedEntriesBox');
