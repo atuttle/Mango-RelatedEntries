@@ -135,7 +135,7 @@ This file is part of RelatedEntries.
 								</ul>
 							</div>
 						</cfoutput></cfsavecontent>
-						<cfset arguments.event.setOutputData(local.relEntryLinkList)/>
+						<cfset arguments.event.setOutputData(arguments.event.getOutputData() & local.relEntryLinkList)/>
 					</cfif>
 				</cfif>
 
@@ -151,7 +151,7 @@ This file is part of RelatedEntries.
 					<cfset arguments.event.data.post.setCustomField(variables.customFieldKey, "Related Entries", arguments.event.data.rawdata.relatedEntries) />
 					<!--- save the entry again --->
 					<cftry>
-						<cflog file="#variables.logFile#" text="updating entry: #arguments.event.data.post.getTitle()#">
+						<!---<cflog file="#variables.logFile#" text="updating entry: #arguments.event.data.post.getTitle()#">--->
 						<cfset getManager().getAdministrator().editPost(
 								arguments.event.data.post.getId(),
 								arguments.event.data.post.getTitle(),
@@ -163,11 +163,11 @@ This file is part of RelatedEntries.
 								"",<!--- user, isn't used --->
 								arguments.event.data.post.customFields
 						)/>
-						<cflog file="#variables.logFile#" text="last update successful">
+						<!---<cflog file="#variables.logFile#" text="last update successful">--->
 						<cfcatch>
 							<cfdump var="#local#" label="local vars">
 							<cfdump var="#cfcatch#">
-							<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
+							<!---<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">--->
 							<cfabort>
 						</cfcatch>
 					</cftry>
@@ -195,7 +195,7 @@ This file is part of RelatedEntries.
 								</cfif>
 								<cfset local.existingRelentries = local.existingRelEntries & local.entryId & variables.titleDelim & local.entryTitle />
 								<cfset local.refPostObj.setCustomField(variables.customFieldKey, "Related Entries", local.existingRelentries)/>
-								<cflog file="#variables.logFile#" text="updating entry: #local.refPostObj.getTitle()#">
+								<!---<cflog file="#variables.logFile#" text="updating entry: #local.refPostObj.getTitle()#">--->
 								<cfset getManager().getAdministrator().editPost(
 										local.refPostObj.getId(),
 										local.refPostObj.getTitle(),
@@ -207,14 +207,14 @@ This file is part of RelatedEntries.
 										"",<!--- user, isn't used --->
 										local.refPostObj.customFields
 								)/>
-								<cflog file="#variables.logFile#" text="last update successful">
+								<!---<cflog file="#variables.logFile#" text="last update successful">--->
 							<cfelse>
-								<cflog file="#variables.logFile#" text="skipping update of related entry: #local.entryId#">
+								<!---<cflog file="#variables.logFile#" text="skipping update of related entry: #local.entryId#">--->
 							</cfif>
 							<cfcatch>
 								<cfdump var="#local#" label="local vars">
 								<cfdump var="#cfcatch#">
-								<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">
+								<!---<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">--->
 								<cfabort>
 							</cfcatch>
 						</cftry>
