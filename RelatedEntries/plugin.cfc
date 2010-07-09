@@ -2,17 +2,17 @@
 LICENSE INFORMATION:
 
 Copyright 2008, Adam Tuttle
- 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not 
-use this file except in compliance with the License. 
 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License.
 
-	http://www.apache.org/licenses/LICENSE-2.0 
-	
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software distributed
-under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 VERSION INFORMATION:
@@ -24,18 +24,18 @@ This file is part of RelatedEntries.
 	<cffunction name="init" access="public" output="false" returntype="any">
 		<cfargument name="mainManager" type="any" required="true" />
 		<cfargument name="preferences" type="any" required="true" />
-		
+
 		<cfset setManager(arguments.mainManager) />
 		<cfset setPreferencesManager(arguments.preferences) />
 		<cfset setPackage("com/fusiongrokker/plugins/RelatedEntries") />
-		
+
 		<cfset variables.customFieldKey = "relEntries-b1" />
 		<cfset variables.entryDelim = "@&@&@&@" />
 		<cfset variables.titleDelim = "|" />
 		<cfset variables.entryDelimShort = chr(10) />
 		<cfset variables.titleDelimShort = chr(13) />
 		<cfset variables.logFile = "Mango-RelatedEntries" />
-	
+
 		<cfreturn this/>
 	</cffunction>
 
@@ -54,10 +54,10 @@ This file is part of RelatedEntries.
 
 	<cffunction name="processEvent" hint="Synchronous event handling" access="public" output="false" returntype="any">
 		<cfargument name="event" type="any" required="true" />
-		
+
 		<cfset var relEntries = ""/>
 		<cfset var local = StructNew() />
-		
+
 		<cfswitch expression="#arguments.event.name#">
 
 			<cfcase value="beforeAdminPostFormEnd">
@@ -103,7 +103,7 @@ This file is part of RelatedEntries.
 			</cfcase>
 
 			<cfcase value="beforeAdminPostFormDisplay">
-				<!--- use this event to hide related entries data from the user in the "custom fields" section... no reason for its raw data to show up ---> 
+				<!--- use this event to hide related entries data from the user in the "custom fields" section... no reason for its raw data to show up --->
 				<cfif arguments.event.item.customFieldExists(variables.customFieldKey)>
 					<cfset request.relatedEntriesRawData = arguments.event.item.getCustomField(variables.customFieldKey).value />
 					<cfset arguments.event.item.removeCustomField(variables.customFieldKey) />
@@ -112,7 +112,7 @@ This file is part of RelatedEntries.
 			</cfcase>
 
 			<cfcase value="showRelatedEntriesList,beforePostContentEnd">
-			
+
 				<cfif arguments.event.contextData.currentPost.customFieldExists(variables.customFieldKey)>
 					<cfset local.relData = arguments.event.contextData.currentPost.getCustomField(variables.customFieldKey).value />
 					<cfset local.relData = replace(local.relData, variables.entryDelim, variables.entryDelimShort, "ALL") />
@@ -141,37 +141,20 @@ This file is part of RelatedEntries.
 
 			</cfcase>
 
+			<cfcase value="beforePostAdd,beforePostUpdate">
+				<!--- update the post data to include related entries custom fields --->
+				<!--- DO NOT update each related entry to point back to current entry here; that'll cause an infinite loop --->
+				<cfif structKeyExists(arguments.event.data.rawData, "relatedEntries")><!--- this catches the original form post (add/update entry) --->
+					<!--- add the related entries data for the newly added/updated entry --->
+					<cfset arguments.event.data.post.setCustomField(variables.customFieldKey, "Related Entries", arguments.event.data.rawdata.relatedEntries) />
+				</cfif>
+			</cfcase>
+
 			<cfcase value="afterPostAdd,afterPostUpdate">
-			
-				<!--- set related entries for this entry --->
+				<!--- NOW update each related entry to point back to the current entry --->
 				<cfif structKeyExists(arguments.event.data.rawData, "relatedEntries")><!--- this catches the original form post (add/update entry) --->
 					<cfset local.entryId = arguments.event.data.post.id />
 					<cfset local.entryTitle = arguments.event.data.post.getTitle() />
-					<!--- add the related entries data for the newly added/updated entry --->
-					<cfset arguments.event.data.post.setCustomField(variables.customFieldKey, "Related Entries", arguments.event.data.rawdata.relatedEntries) />
-					<!--- save the entry again --->
-					<cftry>
-						<!---<cflog file="#variables.logFile#" text="updating entry: #arguments.event.data.post.getTitle()#">--->
-						<cfset getManager().getAdministrator().editPost(
-								arguments.event.data.post.getId(),
-								arguments.event.data.post.getTitle(),
-								arguments.event.data.post.getContent(),
-								arguments.event.data.post.getExcerpt(),
-								arguments.event.data.post.getStatus() eq "published",
-								arguments.event.data.post.getCommentsAllowed(),
-								arguments.event.data.post.getPostedOn(),
-								"",<!--- user, isn't used --->
-								arguments.event.data.post.customFields
-						)/>
-						<!---<cflog file="#variables.logFile#" text="last update successful">--->
-						<cfcatch>
-							<cfdump var="#local#" label="local vars">
-							<cfdump var="#cfcatch#">
-							<!---<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">--->
-							<cfabort>
-						</cfcatch>
-					</cftry>
-	
 					<!--- now update each related entry and add this entry to its related list... --->
 					<cfset local.tmp = arguments.event.data.rawdata.relatedEntries />
 					<cfset local.tmp = replace(local.tmp, variables.entryDelim, variables.entryDelimShort, "ALL") />
@@ -182,45 +165,27 @@ This file is part of RelatedEntries.
 						<cfset local.refPostObj = getManager().getPostsManager().getPostById(local.refPostId, true) />
 						<!--- keep existing related entries of the entry, but add our new one --->
 						<cfif local.refPostObj.customFieldExists(variables.customFieldKey)>
-							<cfset local.existingRelentries = local.refPostObj.getCustomField(variables.customFieldKey).value /> 
+							<cfset local.existingRelentries = local.refPostObj.getCustomField(variables.customFieldKey).value />
 						<cfelse>
-							<cfset local.existingRelentries = "" /> 
+							<cfset local.existingRelentries = "" />
 						</cfif>
 						<!--- no duplicates --->
-						<cftry>
-							<!--- don't care that it's a list, just can we find the id of the original post in the relation data --->
-							<cfif not findNoCase(local.entryId, local.existingRelentries)>
-								<cfif len(local.existingRelentries) gt 0>
-									<cfset local.existingRelentries = local.existingRelEntries & variables.entryDelim />
-								</cfif>
-								<cfset local.existingRelentries = local.existingRelEntries & local.entryId & variables.titleDelim & local.entryTitle />
-								<cfset local.refPostObj.setCustomField(variables.customFieldKey, "Related Entries", local.existingRelentries)/>
-								<!---<cflog file="#variables.logFile#" text="updating entry: #local.refPostObj.getTitle()#">--->
-								<cfset getManager().getAdministrator().editPost(
-										local.refPostObj.getId(),
-										local.refPostObj.getTitle(),
-										local.refPostObj.getContent(),
-										local.refPostObj.getExcerpt(),
-										local.refPostObj.getStatus() eq "published",
-										local.refPostObj.getCommentsAllowed(),
-										local.refPostObj.getPostedOn(),
-										"",<!--- user, isn't used --->
-										local.refPostObj.customFields
-								)/>
-								<!---<cflog file="#variables.logFile#" text="last update successful">--->
-							<cfelse>
-								<!---<cflog file="#variables.logFile#" text="skipping update of related entry: #local.entryId#">--->
+						<!--- don't care that it's a list, just can we find the id of the original post in the relation data --->
+						<cfif not findNoCase(local.entryId, local.existingRelentries)>
+							<cfif len(local.existingRelentries) gt 0>
+								<cfset local.existingRelentries = local.existingRelEntries & variables.entryDelim />
 							</cfif>
-							<cfcatch>
-								<cfdump var="#local#" label="local vars">
-								<cfdump var="#cfcatch#">
-								<!---<cflog file="#variables.logFile#" text="last update unsuccessful -- #cfcatch.message# -- #cfcatch.detail#">--->
-								<cfabort>
-							</cfcatch>
-						</cftry>
+							<cfset local.custFieldUpdate = StructNew() />
+							<cfset local.custFieldUpdate.key = variables.customFieldKey />
+							<cfset local.custFieldUpdate.name = "Related Entries" />
+							<cfset local.custFieldUpdate.value = local.existingRelEntries & local.entryId & variables.titleDelim & local.entryTitle />
+
+							<!---<cfset local.refPostObj.setCustomField(variables.customFieldKey, "Related Entries", local.existingRelentries)/>--->
+
+							<cfset getManager().getAdministrator().setPostCustomField(local.refPostId, local.custFieldUpdate) />
+						</cfif>
 					</cfloop>
 				</cfif>
-	
 			</cfcase>
 
 		</cfswitch>
