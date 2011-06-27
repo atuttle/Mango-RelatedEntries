@@ -1,0 +1,31 @@
+<project name="RelatedEntries" default="copyToDev" basedir=".">
+	
+	<property name="dir.dev" value="/Users/adam/Sites/localhost/MangoDev/components/plugins/user/RelatedEntries/" />
+	<property name="dir.src" value="${basedir}/RelatedEntries" />
+	
+	<property name="zip.dest" value="${basedir}/latest.zip" />
+	
+	<target name="copyToDev">
+		<copy toDir="${dir.dev}">
+			<fileset dir="${dir.src}">
+				<exclude name=".svn" />
+				<exclude name=".git" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="buildRIAForgeZIP">
+		<delete file="${zip.dest}" />
+		<zip
+			destfile="${zip.dest}"
+			basedir="${basedir}"
+			excludes=".svn,.git,.settings,.gitignore,build.xml,.project,settings.xml"
+		/>
+	</target>
+	
+	<target name="all">
+		<antcall target="copyToDev" />
+		<antcall target="buildRIAForgeZIP" />
+	</target>
+
+</project>
